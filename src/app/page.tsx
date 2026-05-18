@@ -1,65 +1,235 @@
-import Image from "next/image";
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { BottomNav } from "@/components/home/BottomNav";
+import { EmergencyStrip } from "@/components/home/EmergencyStrip";
+import { PrimaryCTA, type CTAMode } from "@/components/home/PrimaryCTA";
+import { RecentList } from "@/components/home/RecentList";
+import { ResultPeek } from "@/components/home/ResultPeek";
+import { StatRow } from "@/components/home/StatRow";
+import { TopBar } from "@/components/home/TopBar";
+import { Viewfinder, type ViewfinderMode } from "@/components/home/Viewfinder";
+import { C, F } from "@/components/home/theme";
+import { processBlob, processVideoFrame } from "@/lib/image";
+import { useHistory } from "@/lib/use-history";
+import type { IdentifyApiResponse, ScanResult } from "@/lib/types";
+
+const CITY = "Bangkok";
+
+type Phase = "idle" | "camera" | "analyzing";
+
+async function postIdentify(
+  imageBase64: string,
+  mediaType: "image/jpeg",
+): Promise<IdentifyApiResponse> {
+  const resp = await fetch("/api/identify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ imageBase64, mediaType }),
+  });
+  return (await resp.json()) as IdentifyApiResponse;
+}
 
 export default function Home() {
+  const [phase, setPhase] = useState<Phase>("idle");
+  const [result, setResult] = useState<ScanResult | null>(null);
+  const [userPhoto, setUserPhoto] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const { entries, stats, addScan, hydrated } = useHistory();
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+      for (const track of streamRef.current.getTracks()) track.stop();
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  }, []);
+
+  useEffect(() => () => stopCamera(), [stopCamera]);
+
+  const openCamera = useCallback(async () => {
+    setError(null);
+    if (
+      typeof navigator === "undefined" ||
+      !navigator.mediaDevices?.getUserMedia
+    ) {
+      setError(
+        "Camera is not supported on this device. Use the Scan now button to upload a photo instead.",
+      );
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+        audio: false,
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        try {
+          await videoRef.current.play();
+        } catch {
+          // play() may reject if user navigates away — safe to ignore
+        }
+      }
+      setPhase("camera");
+    } catch {
+      setError(
+        "Camera permission denied. Use the Scan now button to upload a photo instead.",
+      );
+      stopCamera();
+    }
+  }, [stopCamera]);
+
+  const sendAndShow = useCallback(
+    async (
+      imageBase64: string,
+      mediaType: "image/jpeg",
+      photoDataUrl: string,
+    ) => {
+      setPhase("analyzing");
+      try {
+        const data = await postIdentify(imageBase64, mediaType);
+        if (data.error || !data.result) {
+          setError(data.error ?? "Identification failed.");
+          setPhase("idle");
+          return;
+        }
+        setUserPhoto(photoDataUrl);
+        setResult(data.result);
+        addScan(data.result);
+        setPhase("idle");
+      } catch {
+        setError("Network error while identifying. Check your connection.");
+        setPhase("idle");
+      }
+    },
+    [addScan],
+  );
+
+  const capture = useCallback(async () => {
+    if (!videoRef.current) return;
+    setError(null);
+    try {
+      const processed = await processVideoFrame(videoRef.current);
+      stopCamera();
+      await sendAndShow(processed.base64, processed.mediaType, processed.dataUrl);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Capture failed.";
+      setError(message);
+      stopCamera();
+      setPhase("idle");
+    }
+  }, [stopCamera, sendAndShow]);
+
+  const handleFile = useCallback(
+    async (file: File) => {
+      setError(null);
+      try {
+        const processed = await processBlob(file);
+        await sendAndShow(processed.base64, processed.mediaType, processed.dataUrl);
+      } catch {
+        setError("Could not read that image. Try a different file.");
+        setPhase("idle");
+      }
+    },
+    [sendAndShow],
+  );
+
+  const onCTAClick = useCallback(() => {
+    if (phase === "analyzing") return;
+    if (phase === "camera") {
+      void capture();
+      return;
+    }
+    fileInputRef.current?.click();
+  }, [phase, capture]);
+
+  const onViewfinderTap = useCallback(() => {
+    if (phase === "idle") void openCamera();
+  }, [phase, openCamera]);
+
+  const closeResult = useCallback(() => {
+    setResult(null);
+    setUserPhoto(null);
+  }, []);
+
+  const ctaMode: CTAMode = phase;
+  const viewfinderMode: ViewfinderMode = phase === "camera" ? "live" : phase;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div
+      style={{
+        background: C.cream,
+        color: C.ink,
+        minHeight: "100vh",
+        position: "relative",
+        maxWidth: 480,
+        margin: "0 auto",
+        paddingTop: "max(16px, env(safe-area-inset-top))",
+      }}
+    >
+      <TopBar city={CITY} />
+      <Viewfinder
+        mode={viewfinderMode}
+        videoRef={videoRef}
+        onTap={onViewfinderTap}
+        onClose={() => {
+          stopCamera();
+          setPhase("idle");
+        }}
+      />
+      <PrimaryCTA mode={ctaMode} onClick={onCTAClick} />
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: "none" }}
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          event.target.value = "";
+          if (file) void handleFile(file);
+        }}
+      />
+
+      {error && (
+        <div
+          role="alert"
+          style={{
+            margin: "12px 16px 0",
+            padding: "10px 14px",
+            borderRadius: 12,
+            background: "rgba(242,93,93,0.12)",
+            border: "1px solid rgba(242,93,93,0.30)",
+            color: "#F25D5D",
+            fontFamily: F.mono,
+            fontSize: 11,
+            letterSpacing: 0.4,
+            lineHeight: 1.5,
+          }}
+        >
+          {error}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      )}
+
+      <StatRow stats={stats} />
+      <RecentList entries={entries} hydrated={hydrated} />
+      <EmergencyStrip />
+      <BottomNav active="home" />
+
+      <ResultPeek
+        result={result}
+        userPhotoDataUrl={userPhoto}
+        onClose={closeResult}
+      />
     </div>
   );
 }

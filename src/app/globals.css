@@ -1,26 +1,209 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ── Backgrounds (night ramp) ── */
+  --sid-night-0: #060211;
+  --sid-night-1: #0a0418;
+  --sid-night-2: #140a24;
+  --sid-night-3: #150829;
+  --sid-night-4: #2b1456;
+
+  /* ── Surfaces ── */
+  --sid-surface: #241636;
+  --sid-paper: #2a1a40;
+  --sid-deeper: #170828;
+
+  /* ── Moss purple scale ── */
+  --sid-moss: #7e5bc4;
+  --sid-moss-2: #a38bd8;
+  --sid-moss-3: #c9a7f5;
+  --sid-moss-4: #3a1f62;
+  --sid-moss-5: #4a2b7a;
+
+  /* ── Ink (text) ── */
+  --sid-ink: #f1ebff;
+  --sid-ink-2: #b8aad8;
+  --sid-ink-3: #7e7298;
+  --sid-ink-4: #4f4666;
+  --sid-pure-white: #ffffff;
+
+  /* ── Hairlines ── */
+  --sid-hair: rgba(240, 234, 255, 0.1);
+  --sid-hair-soft: rgba(240, 234, 255, 0.05);
+  --sid-hair-strong: rgba(190, 160, 240, 0.22);
+
+  /* ── Danger scale 1–5 ── */
+  --sid-danger-1: #a8dcb0;
+  --sid-danger-1-bg: rgba(168, 220, 176, 0.14);
+  --sid-danger-2: #e5d58f;
+  --sid-danger-2-bg: rgba(229, 213, 143, 0.14);
+  --sid-danger-3: #f0b377;
+  --sid-danger-3-bg: rgba(240, 179, 119, 0.16);
+  --sid-danger-4: #f0846b;
+  --sid-danger-4-bg: rgba(240, 132, 107, 0.18);
+  --sid-danger-5: #f25d5d;
+  --sid-danger-5-bg: rgba(242, 93, 93, 0.2);
+
+  /* ── Accents ── */
+  --sid-rust: #f25d5d;
+  --sid-gold: #e5c46a;
+
+  /* ── Emergency (1669 strip) — never reused ── */
+  --sid-emerg-bg-top: #8c2a1b;
+  --sid-emerg-bg-bottom: #6e1d12;
+  --sid-emerg-ink: #f6e8d6;
+
+  /* ── Backgrounds (composed gradients) ── */
+  --sid-bg-page: radial-gradient(
+    60% 50% at 50% 25%,
+    var(--sid-night-4) 0%,
+    var(--sid-night-3) 55%,
+    var(--sid-night-0) 100%
+  );
+  --sid-bg-viewfinder: radial-gradient(
+    120% 80% at 50% 30%,
+    #2e1c52 0%,
+    #170a2e 60%,
+    #08031a 100%
+  );
+  --sid-bg-cta: linear-gradient(
+    180deg,
+    var(--sid-moss-4) 0%,
+    #1f0d38 55%,
+    #0d0220 100%
+  );
+  --sid-bg-cta-loading: linear-gradient(180deg, #2a1547, #170828);
+  --sid-bg-emergency: linear-gradient(
+    180deg,
+    var(--sid-emerg-bg-top),
+    var(--sid-emerg-bg-bottom)
+  );
+
+  /* ── Shadows ── */
+  --sid-shadow-cta:
+    0 18px 32px -14px rgba(40, 10, 80, 0.85),
+    0 4px 10px -4px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(200, 170, 240, 0.25),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+  --sid-shadow-viewfinder:
+    0 18px 40px -20px rgba(50, 20, 90, 0.6),
+    inset 0 0 0 1px rgba(190, 160, 240, 0.1);
+  --sid-shadow-sheet: 0 -20px 40px -10px rgba(0, 0, 0, 0.25);
+  --sid-shadow-scanline: 0 0 16px 2px rgba(170, 120, 230, 0.6);
+  --sid-shadow-emergency: 0 12px 24px -16px rgba(140, 42, 27, 0.7);
+  --sid-shadow-card: 0 8px 18px -10px rgba(74, 43, 122, 0.6);
+
+  /* ── Animation easing/durations ── */
+  --sid-ease-sheet: cubic-bezier(0.2, 0.9, 0.25, 1);
+  --sid-dur-press: 120ms;
+  --sid-dur-fade: 200ms;
+  --sid-dur-sheet: 280ms;
+
+  /* ── Backwards-compat aliases (legacy theme.ts naming) ── */
+  --bg-deep: var(--sid-night-0);
+  --bg-mid: var(--sid-night-3);
+  --bg-rise: var(--sid-night-4);
+  --cream: var(--sid-night-2);
+  --surface: var(--sid-surface);
+  --paper: var(--sid-paper);
+  --ink: var(--sid-ink);
+  --ink2: var(--sid-ink-2);
+  --ink3: var(--sid-ink-3);
+  --hair: var(--sid-hair);
+  --hair-soft: var(--sid-hair-soft);
+  --moss: var(--sid-moss);
+  --moss2: var(--sid-moss-2);
+  --rust: var(--sid-rust);
+  --gold: var(--sid-gold);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--sid-night-1);
+  --color-foreground: var(--sid-ink);
+  --font-sans: var(--font-geist);
+  --font-serif: var(--font-newsreader);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--sid-night-0);
+  color: var(--sid-ink);
+  -webkit-font-smoothing: antialiased;
+  font-family: var(--font-geist), system-ui, -apple-system, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--sid-bg-page);
+  min-height: 100vh;
+}
+
+@keyframes sid-scan-slow {
+  0% {
+    top: 6%;
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.8;
+  }
+  50% {
+    top: 94%;
+    opacity: 0.6;
+  }
+  92% {
+    opacity: 0.8;
+  }
+  100% {
+    top: 6%;
+    opacity: 0;
+  }
+}
+
+@keyframes sid-scan-fast {
+  0% {
+    top: 8%;
+  }
+  50% {
+    top: 92%;
+  }
+  100% {
+    top: 8%;
+  }
+}
+
+@keyframes sid-rise {
+  from {
+    transform: translateY(60%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes sid-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sid-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+button:active {
+  transform: translateY(1px);
+}
+button:focus-visible {
+  outline: 2px solid var(--sid-moss-5);
+  outline-offset: 2px;
 }

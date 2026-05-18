@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Design handoff bundle (reference material, not application code):
+    "public/snake-id-project/**",
   ]),
 ]);
 
