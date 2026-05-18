@@ -2,7 +2,7 @@
 
 import type { RefObject } from "react";
 import { F } from "./theme";
-import { CloseIcon, SnakeIcon } from "./icons";
+import { CloseIcon } from "./icons";
 
 export type ViewfinderMode = "idle" | "live" | "analyzing";
 
@@ -164,18 +164,20 @@ export function Viewfinder({
             pointerEvents: "none",
           }}
         >
-          <div
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/snake-icon.png"
+            alt=""
+            width={72}
+            height={72}
             style={{
-              width: 64,
-              height: 64,
-              borderRadius: 999,
-              border: "1.5px dashed rgba(200,170,240,0.55)",
-              display: "grid",
-              placeItems: "center",
+              width: 72,
+              height: 72,
+              objectFit: "contain",
+              filter: "brightness(0) invert(1)",
+              opacity: 0.95,
             }}
-          >
-            <SnakeIcon size={48} color="rgba(241,235,255,0.95)" />
-          </div>
+          />
           <div
             style={{
               fontFamily: F.disp,

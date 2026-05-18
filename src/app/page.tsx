@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BottomNav } from "@/components/home/BottomNav";
 import { EmergencyStrip } from "@/components/home/EmergencyStrip";
 import { PrimaryCTA, type CTAMode } from "@/components/home/PrimaryCTA";
 import { RecentList } from "@/components/home/RecentList";
@@ -223,7 +222,7 @@ export default function Home() {
       <StatRow stats={stats} />
       <RecentList entries={entries} hydrated={hydrated} />
       <EmergencyStrip />
-      <BottomNav active="home" />
+      <div style={{ height: "max(16px, env(safe-area-inset-bottom))" }} />
 
       <ResultPeek
         result={result}
