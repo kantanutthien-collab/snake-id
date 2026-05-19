@@ -16,23 +16,20 @@ export function TopBar({ city }: TopBarProps) {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/snake-logo-id.png"
+          alt="Snake·ID"
+          width={34}
+          height={34}
           style={{
             width: 34,
             height: 34,
             borderRadius: 10,
-            background: C.moss,
-            display: "grid",
-            placeItems: "center",
-            color: "#FFFFFF",
-            fontFamily: F.disp,
-            fontSize: 20,
-            lineHeight: 1,
-            fontStyle: "italic",
+            objectFit: "cover",
+            flexShrink: 0,
           }}
-        >
-          S
-        </div>
+        />
         <div style={{ lineHeight: 1.05 }}>
           <div
             style={{

@@ -7,6 +7,8 @@ import { RecentList } from "@/components/home/RecentList";
 import { ResultPeek } from "@/components/home/ResultPeek";
 import { StatRow } from "@/components/home/StatRow";
 import { TopBar } from "@/components/home/TopBar";
+import { SpeciesList } from "@/components/home/SpeciesList";
+import { TabMenu, type TabKey } from "@/components/home/TabMenu";
 import { Viewfinder, type ViewfinderMode } from "@/components/home/Viewfinder";
 import { C, F } from "@/components/home/theme";
 import { processBlob, processVideoFrame } from "@/lib/image";
@@ -30,6 +32,7 @@ async function postIdentify(
 }
 
 export default function Home() {
+  const [tab, setTab] = useState<TabKey>("snakes");
   const [phase, setPhase] = useState<Phase>("idle");
   const [result, setResult] = useState<ScanResult | null>(null);
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
@@ -176,52 +179,70 @@ export default function Home() {
       }}
     >
       <TopBar city={CITY} />
-      <Viewfinder
-        mode={viewfinderMode}
-        videoRef={videoRef}
-        onTap={onViewfinderTap}
-        onClose={() => {
-          stopCamera();
-          setPhase("idle");
-        }}
-      />
-      <PrimaryCTA mode={ctaMode} onClick={onCTAClick} />
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        style={{ display: "none" }}
-        onChange={(event) => {
-          const file = event.target.files?.[0];
-          event.target.value = "";
-          if (file) void handleFile(file);
+      <TabMenu
+        active={tab}
+        onChange={(next) => {
+          if (next !== "snakes") {
+            stopCamera();
+            setPhase("idle");
+            setError(null);
+          }
+          setTab(next);
         }}
       />
 
-      {error && (
-        <div
-          role="alert"
-          style={{
-            margin: "12px 16px 0",
-            padding: "10px 14px",
-            borderRadius: 12,
-            background: "rgba(242,93,93,0.12)",
-            border: "1px solid rgba(242,93,93,0.30)",
-            color: "#F25D5D",
-            fontFamily: F.mono,
-            fontSize: 11,
-            letterSpacing: 0.4,
-            lineHeight: 1.5,
-          }}
-        >
-          {error}
-        </div>
+      {tab === "snakes" ? (
+        <>
+          <Viewfinder
+            mode={viewfinderMode}
+            videoRef={videoRef}
+            onTap={onViewfinderTap}
+            onClose={() => {
+              stopCamera();
+              setPhase("idle");
+            }}
+          />
+          <PrimaryCTA mode={ctaMode} onClick={onCTAClick} />
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              event.target.value = "";
+              if (file) void handleFile(file);
+            }}
+          />
+
+          {error && (
+            <div
+              role="alert"
+              style={{
+                margin: "12px 16px 0",
+                padding: "10px 14px",
+                borderRadius: 12,
+                background: "rgba(242,93,93,0.12)",
+                border: "1px solid rgba(242,93,93,0.30)",
+                color: "#F25D5D",
+                fontFamily: F.mono,
+                fontSize: 11,
+                letterSpacing: 0.4,
+                lineHeight: 1.5,
+              }}
+            >
+              {error}
+            </div>
+          )}
+
+          <StatRow stats={stats} />
+          <RecentList entries={entries} hydrated={hydrated} />
+          <EmergencyStrip />
+        </>
+      ) : (
+        <SpeciesList />
       )}
-
-      <StatRow stats={stats} />
-      <RecentList entries={entries} hydrated={hydrated} />
-      <EmergencyStrip />
       <div style={{ height: "max(16px, env(safe-area-inset-bottom))" }} />
 
       <ResultPeek
