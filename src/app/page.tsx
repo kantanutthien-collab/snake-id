@@ -1,16 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AppShell } from "@/components/home/AppShell";
 import { EmergencyStrip } from "@/components/home/EmergencyStrip";
 import { PrimaryCTA, type CTAMode } from "@/components/home/PrimaryCTA";
 import { RecentList } from "@/components/home/RecentList";
 import { ResultPeek } from "@/components/home/ResultPeek";
 import { StatRow } from "@/components/home/StatRow";
-import { TopBar } from "@/components/home/TopBar";
 import { SpeciesList } from "@/components/home/SpeciesList";
-import { TabMenu, type TabKey } from "@/components/home/TabMenu";
+import type { TabKey } from "@/components/home/TabMenu";
 import { Viewfinder, type ViewfinderMode } from "@/components/home/Viewfinder";
-import { C, F } from "@/components/home/theme";
+import { F } from "@/components/home/theme";
 import { processBlob, processVideoFrame } from "@/lib/image";
 import { useHistory } from "@/lib/use-history";
 import type { IdentifyApiResponse, ScanResult } from "@/lib/types";
@@ -166,31 +166,17 @@ export default function Home() {
   const ctaMode: CTAMode = phase;
   const viewfinderMode: ViewfinderMode = phase === "camera" ? "live" : phase;
 
-  return (
-    <div
-      style={{
-        background: C.cream,
-        color: C.ink,
-        minHeight: "100vh",
-        position: "relative",
-        maxWidth: 480,
-        margin: "0 auto",
-        paddingTop: "max(16px, env(safe-area-inset-top))",
-      }}
-    >
-      <TopBar city={CITY} />
-      <TabMenu
-        active={tab}
-        onChange={(next) => {
-          if (next !== "snakes") {
-            stopCamera();
-            setPhase("idle");
-            setError(null);
-          }
-          setTab(next);
-        }}
-      />
+  const onTabChange = (next: TabKey) => {
+    if (next !== "snakes") {
+      stopCamera();
+      setPhase("idle");
+      setError(null);
+    }
+    setTab(next);
+  };
 
+  return (
+    <AppShell city={CITY} tab={tab} onTabChange={onTabChange}>
       {tab === "snakes" ? (
         <>
           <Viewfinder
@@ -243,13 +229,12 @@ export default function Home() {
       ) : (
         <SpeciesList />
       )}
-      <div style={{ height: "max(16px, env(safe-area-inset-bottom))" }} />
 
       <ResultPeek
         result={result}
         userPhotoDataUrl={userPhoto}
         onClose={closeResult}
       />
-    </div>
+    </AppShell>
   );
 }

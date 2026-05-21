@@ -9,10 +9,21 @@ export function TopBar({ city }: TopBarProps) {
   return (
     <div
       style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 20,
+        background: "#3A1F62",
+        paddingTop: "env(safe-area-inset-top)",
+        borderBottom: "1px solid rgba(200,170,240,0.18)",
+        boxShadow: "0 8px 18px -10px rgba(0,0,0,0.7)",
+      }}
+    >
+    <div
+      style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "6px 20px 14px",
+        padding: "14px 20px 18px",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -64,8 +75,8 @@ export function TopBar({ city }: TopBarProps) {
             gap: 5,
             padding: "6px 10px",
             borderRadius: 999,
-            background: C.surface,
-            border: `1px solid ${C.hair}`,
+            background: "#4A2B7A",
+            border: "1px solid rgba(200,170,240,0.22)",
             fontFamily: F.mono,
             fontSize: 10.5,
             color: C.ink2,
@@ -82,7 +93,7 @@ export function TopBar({ city }: TopBarProps) {
             height: 34,
             borderRadius: 10,
             border: `1px solid ${C.hair}`,
-            background: C.surface,
+            background: C.paper,
             color: C.ink2,
             display: "grid",
             placeItems: "center",
@@ -92,6 +103,7 @@ export function TopBar({ city }: TopBarProps) {
           <GearIcon size={16} color={C.ink2} />
         </button>
       </div>
+    </div>
     </div>
   );
 }

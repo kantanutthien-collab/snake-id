@@ -5,6 +5,7 @@ import { species, type Species, type VenomousLabel } from "@/data/species";
 import { DANGER } from "@/data/danger";
 import { findCandidate } from "@/data/inaturalist";
 import type { DangerLevel } from "@/lib/types";
+import { SpeciesDetailSheet } from "./SpeciesDetailSheet";
 import { C, F } from "./theme";
 
 function venomousTone(v: VenomousLabel): { bg: string; tone: string } {
@@ -76,13 +77,21 @@ function VenomousChip({ value }: { value: VenomousLabel }) {
   );
 }
 
-function Row({ s }: { s: Species }) {
+function Row({
+  s,
+  onClick,
+}: {
+  s: Species;
+  onClick: () => void;
+}) {
   const d = DANGER[s.danger];
   const candidate = findCandidate(s.sci);
   const photoUrl = s.localPhoto ?? candidate?.photo?.url;
 
   return (
-    <div
+    <button
+      type="button"
+      onClick={onClick}
       style={{
         display: "flex",
         gap: 12,
@@ -90,6 +99,11 @@ function Row({ s }: { s: Species }) {
         background: C.surface,
         border: `1px solid ${C.hair}`,
         borderRadius: 14,
+        textAlign: "left",
+        cursor: "pointer",
+        width: "100%",
+        color: "inherit",
+        font: "inherit",
       }}
     >
       {photoUrl ? (
@@ -191,31 +205,20 @@ function Row({ s }: { s: Species }) {
           📍 {s.region}
         </div>
 
-        <a
-          href={s.wikiUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+        <div
           style={{
-            marginTop: 10,
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            padding: "7px 12px",
-            borderRadius: 10,
-            background: "rgba(126,91,196,0.18)",
-            border: "1px solid rgba(163,139,216,0.35)",
-            color: C.ink,
-            fontFamily: F.ui,
-            fontSize: 12,
-            fontWeight: 600,
-            letterSpacing: -0.1,
-            textDecoration: "none",
+            marginTop: 8,
+            fontFamily: F.mono,
+            fontSize: 10,
+            color: C.moss2,
+            letterSpacing: 0.6,
+            textTransform: "uppercase",
           }}
         >
-          📖 Read on Wikipedia →
-        </a>
+          Tap for details →
+        </div>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -280,6 +283,7 @@ function FilterBar({
 
 export function SpeciesList() {
   const [filter, setFilter] = useState<Filter>("all");
+  const [selected, setSelected] = useState<Species | null>(null);
 
   const counts = useMemo<Record<Filter, number>>(
     () => ({
@@ -329,9 +333,14 @@ export function SpeciesList() {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {filtered.map((s) => (
-          <Row key={s.id} s={s} />
+          <Row key={s.id} s={s} onClick={() => setSelected(s)} />
         ))}
       </div>
+
+      <SpeciesDetailSheet
+        species={selected}
+        onClose={() => setSelected(null)}
+      />
     </div>
   );
 }

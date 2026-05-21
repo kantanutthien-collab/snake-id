@@ -166,16 +166,14 @@ export function Viewfinder({
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/snake-icon.png"
+            src="/snake-id-icon.png"
             alt=""
-            width={72}
-            height={72}
+            width={200}
+            height={200}
             style={{
-              width: 72,
-              height: 72,
+              width: 200,
+              height: 200,
               objectFit: "contain",
-              filter: "brightness(0) invert(1)",
-              opacity: 0.95,
             }}
           />
           <div
