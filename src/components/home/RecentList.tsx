@@ -13,14 +13,17 @@ interface RecentListProps {
 
 function PhotoOrSwatch({
   result,
+  userThumbnail,
 }: {
   result: Extract<ScanResult, { kind: "snake" }>;
+  userThumbnail?: string;
 }) {
-  if (result.photo) {
+  const src = userThumbnail ?? result.photo?.url;
+  if (src) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        src={result.photo.url}
+        src={src}
         alt=""
         style={{
           width: 44,
@@ -53,7 +56,10 @@ function RecentRow({ entry }: { entry: HistoryEntry }) {
           border: `1px solid ${C.hair}`,
         }}
       >
-        <PhotoOrSwatch result={entry.result} />
+        <PhotoOrSwatch
+          result={entry.result}
+          userThumbnail={entry.userThumbnail}
+        />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
@@ -120,6 +126,21 @@ function RecentRow({ entry }: { entry: HistoryEntry }) {
         border: `1px solid ${C.hair}`,
       }}
     >
+      {entry.userThumbnail ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={entry.userThumbnail}
+          alt=""
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 12,
+            objectFit: "cover",
+            flexShrink: 0,
+            boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.1)",
+          }}
+        />
+      ) : (
       <div
         style={{
           width: 44,
@@ -136,6 +157,7 @@ function RecentRow({ entry }: { entry: HistoryEntry }) {
       >
         {o.emoji}
       </div>
+      )}
       <div style={{ flex: 1 }}>
         <div
           style={{

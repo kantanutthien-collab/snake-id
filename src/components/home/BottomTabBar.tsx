@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { C, F } from "./theme";
-import { CameraSimpleIcon, ListIcon } from "./icons";
+import { CameraSimpleIcon, ChatIcon, ListIcon } from "./icons";
 import type { TabKey } from "./TabMenu";
 
 export const BOTTOM_BAR_HEIGHT = 64;
@@ -23,6 +23,11 @@ const TABS: TabOption[] = [
     key: "species",
     label: "Species",
     icon: (c) => <ListIcon size={22} color={c} />,
+  },
+  {
+    key: "ask",
+    label: "Ask",
+    icon: (c) => <ChatIcon size={22} color={c} />,
   },
 ];
 

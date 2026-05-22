@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/home/AppShell";
+import { AskTab } from "@/components/home/AskTab";
 import { EmergencyStrip } from "@/components/home/EmergencyStrip";
 import { PrimaryCTA, type CTAMode } from "@/components/home/PrimaryCTA";
 import { RecentList } from "@/components/home/RecentList";
@@ -11,7 +12,7 @@ import { SpeciesList } from "@/components/home/SpeciesList";
 import type { TabKey } from "@/components/home/TabMenu";
 import { Viewfinder, type ViewfinderMode } from "@/components/home/Viewfinder";
 import { F } from "@/components/home/theme";
-import { processBlob, processVideoFrame } from "@/lib/image";
+import { makeThumbnail, processBlob, processVideoFrame } from "@/lib/image";
 import { useHistory } from "@/lib/use-history";
 import type { IdentifyApiResponse, ScanResult } from "@/lib/types";
 
@@ -21,7 +22,7 @@ type Phase = "idle" | "camera" | "analyzing";
 
 async function postIdentify(
   imageBase64: string,
-  mediaType: "image/jpeg",
+  mediaType: "image/jpeg" | "image/webp",
 ): Promise<IdentifyApiResponse> {
   const resp = await fetch("/api/identify", {
     method: "POST",
@@ -93,7 +94,7 @@ export default function Home() {
   const sendAndShow = useCallback(
     async (
       imageBase64: string,
-      mediaType: "image/jpeg",
+      mediaType: "image/jpeg" | "image/webp",
       photoDataUrl: string,
     ) => {
       setPhase("analyzing");
@@ -106,7 +107,13 @@ export default function Home() {
         }
         setUserPhoto(photoDataUrl);
         setResult(data.result);
-        addScan(data.result);
+        let thumb: string | undefined;
+        try {
+          thumb = await makeThumbnail(photoDataUrl, 200, 0.7);
+        } catch {
+          // thumbnail is best-effort — history still records without it
+        }
+        addScan(data.result, thumb);
         setPhase("idle");
       } catch {
         setError("Network error while identifying. Check your connection.");
@@ -166,14 +173,17 @@ export default function Home() {
   const ctaMode: CTAMode = phase;
   const viewfinderMode: ViewfinderMode = phase === "camera" ? "live" : phase;
 
-  const onTabChange = (next: TabKey) => {
-    if (next !== "snakes") {
-      stopCamera();
-      setPhase("idle");
-      setError(null);
-    }
-    setTab(next);
-  };
+  const onTabChange = useCallback(
+    (next: TabKey) => {
+      if (next !== "snakes") {
+        stopCamera();
+        setPhase("idle");
+        setError(null);
+      }
+      setTab(next);
+    },
+    [stopCamera],
+  );
 
   return (
     <AppShell city={CITY} tab={tab} onTabChange={onTabChange}>
@@ -226,8 +236,10 @@ export default function Home() {
           <RecentList entries={entries} hydrated={hydrated} />
           <EmergencyStrip />
         </>
-      ) : (
+      ) : tab === "species" ? (
         <SpeciesList />
+      ) : (
+        <AskTab />
       )}
 
       <ResultPeek

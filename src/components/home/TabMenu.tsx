@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { C, F } from "./theme";
 import { CameraSimpleIcon, ChevronDownIcon, ListIcon } from "./icons";
 
-export type TabKey = "snakes" | "species";
+export type TabKey = "snakes" | "species" | "ask";
 
 interface TabOption {
   key: TabKey;

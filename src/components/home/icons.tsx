@@ -219,6 +219,23 @@ export function CameraSimpleIcon({
   );
 }
 
+export function ChatIcon({ size = 16, color = "currentColor" }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 12a8 8 0 0 1-8 8H7l-4 3v-11a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z" />
+    </svg>
+  );
+}
+
 export function ListIcon({ size = 16, color = "currentColor" }: IconProps) {
   return (
     <svg

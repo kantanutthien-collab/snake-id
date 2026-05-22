@@ -6,9 +6,15 @@ import type { IdentifyApiResponse } from "@/lib/types";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
+type SupportedMediaType =
+  | "image/jpeg"
+  | "image/png"
+  | "image/webp"
+  | "image/gif";
+
 interface IdentifyRequest {
   imageBase64: string;
-  mediaType: "image/jpeg" | "image/png" | "image/webp" | "image/gif";
+  mediaType: SupportedMediaType;
 }
 
 const SYSTEM_PROMPT = `You are a Thailand wildlife identifier for a field-safety app called Snake·ID.

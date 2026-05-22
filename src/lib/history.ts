@@ -7,6 +7,8 @@ export interface HistoryEntry {
   id: string;
   when: string;
   result: ScanResult;
+  /** Small (~200px) thumbnail data URL of the photo the user actually scanned. */
+  userThumbnail?: string;
 }
 
 export interface HistoryStats {
@@ -56,7 +58,10 @@ export function clearHistory(): void {
   }
 }
 
-export function createEntry(result: ScanResult): HistoryEntry {
+export function createEntry(
+  result: ScanResult,
+  userThumbnail?: string,
+): HistoryEntry {
   return {
     id:
       typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -64,6 +69,7 @@ export function createEntry(result: ScanResult): HistoryEntry {
         : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     when: new Date().toISOString(),
     result,
+    userThumbnail,
   };
 }
 

@@ -13,7 +13,7 @@ import {
 interface UseHistoryReturn {
   entries: HistoryEntry[];
   stats: ReturnType<typeof computeStats>;
-  addScan: (result: ScanResult) => void;
+  addScan: (result: ScanResult, userThumbnail?: string) => void;
   hydrated: boolean;
 }
 
@@ -29,13 +29,16 @@ export function useHistory(): UseHistoryReturn {
     setHydrated(true);
   }, []);
 
-  const addScan = useCallback((result: ScanResult) => {
-    setEntries((prev) => {
-      const next = [createEntry(result), ...prev].slice(0, 50);
-      saveHistory(next);
-      return next;
-    });
-  }, []);
+  const addScan = useCallback(
+    (result: ScanResult, userThumbnail?: string) => {
+      setEntries((prev) => {
+        const next = [createEntry(result, userThumbnail), ...prev].slice(0, 50);
+        saveHistory(next);
+        return next;
+      });
+    },
+    [],
+  );
 
   return {
     entries,
